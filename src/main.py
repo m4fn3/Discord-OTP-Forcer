@@ -99,6 +99,7 @@ def main():
                     human_click(driver, button)
                     time.sleep(5)
                     print(toColor(f"- Enter text", "cyan"))
+                    done = 0
                     for i in range(5):
                         try:
                             inputText = driver.find_element(by=By.XPATH, value='//*[@aria-label="チャレンジテキスト入力"]')
@@ -107,14 +108,53 @@ def main():
                                 inputText.send_keys(t)
                                 time.sleep(0.2)
                             inputText.send_keys(Keys.RETURN)
-                            print(toColor(f"  (trying {i + 1})", "cyan"))
+                            print(toColor(f"  text ({i + 1})", "cyan"))
+                            done += 1
                         except:
                             break
+                    if done < 3:
+                        raise RuntimeError()
                     print(print(toColor(f"[+] Successfully bypassed hCaptcha!", "yellow")))
                     time.sleep(5)
                     break
                 except:
                     print(print(toColor(f"[+] Something went wrong while bypassing hCaptcha.", "magenta")))
+                    driver.switch_to.default_content()
+                    wait = WDW(driver, 5)
+                    wait.until(EC.frame_to_be_available_and_switch_to_it((By.CSS_SELECTOR, 'iframe[title="hCaptcha セキュリティ チャレンジのチェックボックスを含むウィジェット"]')))
+                    time.sleep(1)
+                    try:
+                        # isError = not (driver.find_element(by=By.ID, value='status').get_attribute("aria-hidden"))
+                        driver.find_element(by=By.XPATH, value='//*[contains(@id, "status") and contains(@aria-hidden, "false")]')
+                        # if "コンピュータまたはネットワークが送信したリクエストが多すぎます" in driver.page_source:
+                        print(print(toColor(f"[x] Too many attempts of hCaptcha Error", "magenta")))
+                        print(toColor(f"- Click checkbox", "cyan"))
+                        start_button = wait.until(EC.element_to_be_clickable((By.ID, "checkbox")))
+                        human_click(driver, start_button)
+                        time.sleep(3)
+                        driver.switch_to.default_content()
+                        wait = WDW(driver, 5)
+                        wait.until(EC.frame_to_be_available_and_switch_to_it((By.CSS_SELECTOR, "iframe[title='hCaptchaチャレンジの主な内容']")))
+                        print(toColor(f"- Enter text", "cyan"))
+                        done = 0
+                        for i in range(5):
+                            try:
+                                inputText = driver.find_element(by=By.XPATH, value='//*[@aria-label="チャレンジテキスト入力"]')
+                                time.sleep(1)
+                                for t in ["い", "い", "え"]:
+                                    inputText.send_keys(t)
+                                    time.sleep(0.2)
+                                inputText.send_keys(Keys.RETURN)
+                                print(toColor(f"  text ({i + 1})", "cyan"))
+                                done += 1
+                            except:
+                                break
+                        if done >= 3:
+                            print(print(toColor(f"[+] Successfully bypassed hCaptcha!", "yellow")))
+                        else:
+                            return False
+                    except:
+                        return False
         else:
             # Attempt to find the TOTP login field
             try:
@@ -174,5 +214,7 @@ def main():
 if __name__ == "__main__":
     print(toColor("[*] Starting main program", "cyan"))
     while True:
-        if not main():
+        if main():
+            while input("Type 'quit' to close.") != "quit":
+                pass
             break
