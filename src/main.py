@@ -71,12 +71,13 @@ def main():
     # Set up the statistics variables
     totpCount = 0
     ratelimitCount = 0
-
+    er = 0
     # loginTOTP = otp input field. TOTP stands for Timed One Time Password
     # Constantly run the script
     while True:
         # hCaptcha is required
         if "おかえりなさい！" in driver.page_source:
+            er = O
             while True:
                 try:
                     # hCaptcha bypass
@@ -118,11 +119,14 @@ def main():
                     time.sleep(5)
                     break
                 except:
-                    print(print(toColor(f"[+] Something went wrong while bypassing hCaptcha.", "magenta")))
-                    driver.switch_to.default_content()
-                    wait = WDW(driver, 5)
-                    wait.until(EC.frame_to_be_available_and_switch_to_it((By.CSS_SELECTOR, 'iframe[title="hCaptcha セキュリティ チャレンジのチェックボックスを含むウィジェット"]')))
-                    time.sleep(1)
+                    try:
+                        print(print(toColor(f"[+] Something went wrong while bypassing hCaptcha.", "magenta")))
+                        driver.switch_to.default_content()
+                        wait = WDW(driver, 5)
+                        wait.until(EC.frame_to_be_available_and_switch_to_it((By.CSS_SELECTOR, 'iframe[title="hCaptcha セキュリティ チャレンジのチェックボックスを含むウィジェット"]')))
+                        time.sleep(1)
+                    except:
+                        break
                     try:
                         # isError = not (driver.find_element(by=By.ID, value='status').get_attribute("aria-hidden"))
                         driver.find_element(by=By.XPATH, value='//*[contains(@id, "status") and contains(@aria-hidden, "false")]')
@@ -152,10 +156,13 @@ def main():
                         if done >= 3:
                             print(print(toColor(f"[+] Successfully bypassed hCaptcha!", "yellow")))
                         else:
+                            print(print(toColor(f"[+] Failed to bypass hCaptcha. Wait 60", "magenta")))
+                            time.sleep(60)
                             return False
                     except:
                         return False
         else:
+            er = 0
             # Attempt to find the TOTP login field
             try:
                 loginTOTP = driver.find_element(by=By.XPATH, value='//*[@aria-label="Discordの認証／バックアップコードを入力してください"]')
@@ -207,6 +214,10 @@ def main():
 
             # If the TOTP login field is not found (e.g the user hasn't completed the Captcha, then try again
             except NoSuchElementException:
+                er += 1
+                if er > 10:
+                    print(print(toColor(f"[+] Abnormal moment", "magenta")))
+                    return False
                 # print(traceback2.format_exc(()))
                 pass
 
