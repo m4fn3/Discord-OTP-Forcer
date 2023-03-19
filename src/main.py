@@ -77,7 +77,7 @@ def main():
     while True:
         # hCaptcha is required
         if "おかえりなさい！" in driver.page_source:
-            er = O
+            er = 0
             while True:
                 try:
                     # hCaptcha bypass
